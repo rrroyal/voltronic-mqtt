@@ -1,0 +1,128 @@
+sensor:
+  # QPIGS
+  - unique_id: "voltronic_grid_voltage"
+    name: "voltronic_grid_voltage"
+    state_topic: "homeassistant/sensor/voltronic/qpigs"
+    value_template: "{{ value_json.grid_voltage }}"
+    unit_of_measurement: "V"
+    icon: "mdi:transmission-tower"
+    device_class: voltage
+    state_class: measurement
+  - unique_id: "voltronic_grid_frequency"
+    name: "voltronic_grid_frequency"
+    state_topic: "homeassistant/sensor/voltronic/qpigs"
+    value_template: "{{ value_json.grid_frequency | float }}"
+    unit_of_measurement: "Hz"
+    icon: "mdi:transmission-tower"
+    device_class: frequency
+    state_class: measurement
+  - unique_id: "voltronic_ac_output_voltage"
+    name: "voltronic_ac_output_voltage"
+    state_topic: "homeassistant/sensor/voltronic/qpigs"
+    value_template: "{{ value_json.ac_output_voltage }}"
+    unit_of_measurement: "V"
+    icon: "mdi:lightning-bolt"
+    device_class: voltage
+    state_class: measurement
+  - unique_id: "voltronic_ac_output_frequency"
+    name: "voltronic_ac_output_frequency"
+    state_topic: "homeassistant/sensor/voltronic/qpigs"
+    value_template: "{{ value_json.ac_output_frequency }}"
+    unit_of_measurement: "Hz"
+    icon: "mdi:current-ac"
+    device_class: frequency
+    state_class: measurement
+  - unique_id: "voltronic_ac_output_apparent_power"
+    name: "voltronic_ac_output_apparent_power"
+    state_topic: "homeassistant/sensor/voltronic/qpigs"
+    value_template: "{{ value_json.ac_output_apparent_power }}"
+    unit_of_measurement: "VA"
+    icon: "mdi:home-lightning-bolt"
+    device_class: apparent_power
+    state_class: measurement
+  - unique_id: "voltronic_ac_output_active_power"
+    name: "voltronic_ac_output_active_power"
+    state_topic: "homeassistant/sensor/voltronic/qpigs"
+    value_template: "{{ value_json.ac_output_active_power }}"
+    unit_of_measurement: "W"
+    icon: "mdi:home-lightning-bolt"
+    device_class: power
+    state_class: measurement
+  - unique_id: "voltronic_output_load_percent"
+    name: "voltronic_output_load_percent"
+    state_topic: "homeassistant/sensor/voltronic/qpigs"
+    value_template: "{{ value_json.output_load_percent }}"
+    unit_of_measurement: "%"
+    icon: "mdi:brightness-percent"
+    device_class: power_factor
+    state_class: measurement
+  - unique_id: "voltronic_battery_voltage"
+    name: "voltronic_battery_voltage"
+    state_topic: "homeassistant/sensor/voltronic/qpigs"
+    value_template: "{{ value_json.battery_voltage }}"
+    unit_of_measurement: "V"
+    icon: "mdi:lightning-bolt"
+    device_class: voltage
+    state_class: measurement
+  - unique_id: "voltronic_battery_charging_current"
+    name: "voltronic_battery_charging_current"
+    state_topic: "homeassistant/sensor/voltronic/qpigs"
+    value_template: "{{ value_json.battery_charging_current }}"
+    unit_of_measurement: "A"
+    icon: "mdi:current-dc"
+    device_class: current
+    state_class: measurement
+  - unique_id: "voltronic_battery_capacity"
+    name: "voltronic_battery_capacity"
+    state_topic: "homeassistant/sensor/voltronic/qpigs"
+    value_template: "{{ value_json.battery_capacity }}"
+    unit_of_measurement: "%"
+    icon: "mdi:battery-outline"
+    device_class: battery
+    state_class: measurement
+  - unique_id: "voltronic_pv_input_current"
+    name: "voltronic_pv_input_current"
+    state_topic: "homeassistant/sensor/voltronic/qpigs"
+    value_template: "{{ value_json.pv_input_current }}"
+    unit_of_measurement: "A"
+    icon: "mdi:current-dc"
+    device_class: current
+    state_class: measurement
+  - unique_id: "voltronic_pv_input_voltage"
+    name: "voltronic_pv_input_voltage"
+    state_topic: "homeassistant/sensor/voltronic/qpigs"
+    value_template: "{{ value_json.pv_input_voltage }}"
+    unit_of_measurement: "V"
+    icon: "mdi:solar-power"
+    device_class: voltage
+    state_class: measurement
+  - unique_id: "voltronic_battery_discharge_current"
+    name: "voltronic_battery_discharge_current"
+    state_topic: "homeassistant/sensor/voltronic/qpigs"
+    value_template: "{{ value_json.battery_discharge_current }}"
+    unit_of_measurement: "A"
+    icon: "mdi:current-dc"
+    device_class: current
+    state_class: measurement
+  - unique_id: "voltronic_pv_charging_power"
+    name: "voltronic_pv_charging_power"
+    state_topic: "homeassistant/sensor/voltronic/qpigs"
+    value_template: "{{ value_json.pv_charging_power }}"
+    unit_of_measurement: "W"
+    icon: "mdi:solar-power-variant"
+    device_class: power
+    state_class: measurement
+
+select:
+  - unique_id: "voltronic_output_source_priority"
+    name: "voltronic_output_source_priority"
+    state_topic: "homeassistant/sensor/voltronic/qpiri"
+    value_template: >-
+      {% set options = ["Utility First", "Solar First", "SBU"] %}
+      0{{ value_json.output_source_priority }} ({{ options[value_json.output_source_priority] }})
+    command_topic: "homeassistant/sensor/voltronic/send_cmd"
+    command_template: POP{{ value[:2] }}
+    options:
+      - "00 (Utility First)"
+      - "01 (Solar First)"
+      - "02 (SBU)"

@@ -15,6 +15,6 @@ COPY requirements.txt /app/
 RUN cd /app && pip3 install -r requirements.txt
 
 WORKDIR /app
-ENTRYPOINT ["/bin/bash", "/app/run.sh"]
+ENTRYPOINT ["/bin/sh", "/app/run.sh"]
 
 #EXPOSE 1883

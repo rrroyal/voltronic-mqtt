@@ -17,7 +17,7 @@ def class_for_name(module_name, class_name):
 class SerialInverter:
 	s = None
 
-	def open(self, device_path: str, baudrate: int = 2400, bytesize: int = serial.EIGHTBITS, parity: int = serial.PARITY_NONE, stopbits: int = serial.STOPBITS_ONE):
+	def open(self, device_path: str, baudrate: int = 2400, bytesize: int = serial.EIGHTBITS, parity: str = serial.PARITY_NONE, stopbits: int = serial.STOPBITS_ONE):
 		if self.s is not None and self.s.is_open:
 			self.s.close()
 

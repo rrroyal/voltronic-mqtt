@@ -63,7 +63,7 @@ def process_command(inverter_client: SerialInverter, command: str):
 
 	if parsed is not None:
 		parsed_json = json.dumps(parsed.__dict__)
-		_print(VerboseLevel.Always, parsed_json)
+		_print(VerboseLevel.Info, parsed_json)
 		return parsed_json
 	else:
 		_print(VerboseLevel.Error, ansi.FG_RED + f"Failed to parse!\n{data}" + ansi.RESET)
@@ -72,18 +72,18 @@ def process_command(inverter_client: SerialInverter, command: str):
 def main():
 	parser = argparse.ArgumentParser()
 	parser.add_argument("command", help="comma-separated commands to send")
-	parser.add_argument("-d", "--device", type=str, help="serial device", dest="serial_device", required=True)
+	parser.add_argument("-d", "--device", type=str, help=f"serial device", dest="serial_device", required=True)
 	parser.add_argument("-p", "--polling-interval", type=int, help="Polling interval", dest="polling_interval")
 	parser.add_argument("-m", "--mqtt", help="mqtt config (format: <username>:<password>@<broker>:<port>)", dest="mqtt_credentials")
-	parser.add_argument("-c", "--client-id", help="mqtt client id", dest="mqtt_client_id")
-	parser.add_argument("-t", "--topic", help="mqtt topic", dest="mqtt_topic")
-	parser.add_argument("-s", "--subscribe-topic", help="mqtt topic to subscribe to", dest="mqtt_topic_sub")
+	parser.add_argument("-c", "--client-id", help=f"mqtt client id", dest="mqtt_client_id")
+	parser.add_argument("-t", "--topic", help=f"mqtt topic", dest="mqtt_topic")
+	parser.add_argument("-s", "--subscribe-topic", help=f"mqtt topic to subscribe to", dest="mqtt_topic_sub")
 	parser.add_argument("-v", "--verbose", help="verbose level", type=int, dest="verbose_level", default=VerboseLevel.Silent)
 	args = parser.parse_args()
 
 	global VERBOSE
 	VERBOSE = VerboseLevel(args.verbose_level)
-	
+
 	commands = args.command.split(",")
 
 	mqtt_client = None
@@ -103,30 +103,27 @@ def main():
 
 	inverter_client.open(serial_device)
 
-	def process(command: str):
+	def process(command: str, send_mqtt_message: bool = True):
 		global PROCESSING_COMMAND
 		while PROCESSING_COMMAND:
 			pass
-		
+
 		PROCESSING_COMMAND = True
 		output_json = process_command(inverter_client, command)
 		PROCESSING_COMMAND = False
 
-		if mqtt_client is not None:
+		if send_mqtt_message and mqtt_client is not None:
 			topic = f"{mqtt_topic}/{command}".lower()
 			send_mqtt_update(mqtt_client, topic, output_json)
 
 	if mqtt_client is not None and args.mqtt_topic_sub is not None:
 		topic = f"{mqtt_topic}/{args.mqtt_topic_sub}".lower()
-
-		_print(VerboseLevel.Info, ansi.FG_CYAN + f"Subscribing to \"{topic}\"." + ansi.RESET)
+		_print(VerboseLevel.Notice, ansi.FG_CYAN + f"Subscribing to \"{topic}\"" + ansi.RESET)
 
 		def handle_mqtt_message(userdata, msg):
 			command = msg.payload.decode()
-
 			_print(VerboseLevel.Notice, ansi.FG_CYAN + f"Incoming message: \"{command}\"" + ansi.RESET)
-
-			process(command)
+			process(command, send_mqtt_message=False)
 
 		mqtt_client.subscribe(topic, handle_mqtt_message)
 

@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/bin/sh
 
 MQTT_CONFIG="${MQTT_PASS}@${MQTT_HOST}"
 

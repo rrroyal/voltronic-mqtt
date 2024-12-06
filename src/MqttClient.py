@@ -5,7 +5,7 @@ import paho.mqtt.client as mqtt
 PUBLISH_TIMEOUT = 5
 
 class MqttClient:
-	client = None
+	client: mqtt.Client
 	message_queue = []
 
 	def __init__(self, client_id: str, username: str, password: str):
@@ -24,7 +24,7 @@ class MqttClient:
 		while not self.client.is_connected():
 			pass
 
-	def subscribe(self, topic: str, handler: any):
+	def subscribe(self, topic: str, handler):
 		def on_message(client, userdata, msg):
 			handler(userdata, msg)
 

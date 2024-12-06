@@ -44,7 +44,12 @@ def parse_mqtt_param(param: str):
 		[username, password] = passwd.split(":")
 		[host, port] = url.split(":")
 
-	return [username, password, host, int(port)]
+	return [
+		username,
+		password,
+		host,
+		int(port) if port is not None else None
+	]
 
 def send_mqtt_update(mqtt_client: MqttClient, mqtt_topic: str, payload: str):
 	log(VerboseLevel.Debug, ansi.FG_CYAN + f"Sending payload..." + ansi.RESET)
@@ -58,6 +63,10 @@ def process_command(inverter_client: SerialInverter, command: str):
 	log(VerboseLevel.Info, ansi.FG_MAGENTA + f"Requesting \"{command}\"..." + ansi.RESET)
 
 	data = inverter_client.send_command(command, check_crc=False)
+	if data is None:
+		log(VerboseLevel.Error, ansi.FG_RED + f"Didn't get data in response!" + ansi.RESET)
+		return
+
 	parsed = inverter_client.parse_response(command, data)
 
 	log(VerboseLevel.Debug, ansi.FG_YELLOW + str(data) + ansi.RESET)
@@ -88,21 +97,21 @@ def main():
 	commands = args.command.split(",")
 
 	mqtt_client = None
-	mqtt_credentials = args.mqtt_credentials
-	mqtt_client_id = args.mqtt_client_id
-	mqtt_topic = args.mqtt_topic
+	mqtt_credentials: str | None = args.mqtt_credentials
+	mqtt_client_id: str | None = args.mqtt_client_id
+	mqtt_topic: str | None = args.mqtt_topic
 	if mqtt_credentials is not None and mqtt_client_id is not None and mqtt_topic is not None:
-		[mqtt_username, mqtt_password, mqtt_broker, mqtt_port] = parse_mqtt_param(mqtt_credentials)
-		mqtt_client = MqttClient(mqtt_client_id, mqtt_username, mqtt_password)
-		mqtt_client.connect(mqtt_broker, mqtt_port)
+		mqtt_parsed = parse_mqtt_param(mqtt_credentials)
+		if mqtt_parsed is not None:
+			[mqtt_username, mqtt_password, mqtt_broker, mqtt_port] = mqtt_parsed
+			mqtt_client = MqttClient(mqtt_client_id, mqtt_username, mqtt_password)
+			mqtt_client.connect(mqtt_broker, mqtt_port)
 
 	serial_device = args.serial_device.strip()
 
-	inverter_client = SerialInverter()
-
 	log(VerboseLevel.Info, ansi.FG_CYAN + f"Opening \"{serial_device}\"..." + ansi.RESET)
-
-	inverter_client.open(serial_device)
+	inverter_client = SerialInverter(device_path = serial_device)
+	inverter_client.open()
 
 	def process(command: str, send_mqtt_message: bool = True):
 		global PROCESSING_COMMAND
@@ -113,7 +122,7 @@ def main():
 		output_json = process_command(inverter_client, command)
 		PROCESSING_COMMAND = False
 
-		if send_mqtt_message and mqtt_client is not None:
+		if send_mqtt_message and mqtt_client is not None and output_json is not None:
 			topic = f"{mqtt_topic}/{command}".lower()
 			send_mqtt_update(mqtt_client, topic, output_json)
 
@@ -139,8 +148,8 @@ def main():
 				for command in commands:
 					process(command)
 			except SerialException as e:
-				log(VerboseLevel.Error, ansi.FG_RED + e.strerror + ansi.RESET)
-				inverter_client.open(serial_device)
+				log(VerboseLevel.Error, ansi.FG_RED + f"{e.strerror}" + ansi.RESET)
+				inverter_client.open()
 			finally:
 				time.sleep(args.polling_interval)
 

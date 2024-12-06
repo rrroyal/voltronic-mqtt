@@ -15,23 +15,27 @@ def class_for_name(module_name, class_name):
 	return c
 
 class SerialInverter:
-	s = None
+	s: serial.Serial
 
-	def open(self, device_path: str, baudrate: int = 2400, bytesize: int = serial.EIGHTBITS, parity: str = serial.PARITY_NONE, stopbits: int = serial.STOPBITS_ONE):
-		if self.s is not None and self.s.is_open:
-			self.s.close()
-
+	def __init__(self, device_path: str, baudrate: int = 2400, bytesize: int = serial.EIGHTBITS, parity: str = serial.PARITY_NONE, stopbits: int = serial.STOPBITS_ONE):
 		s = serial.Serial()
 		s.port = device_path
 		s.baudrate = baudrate
 		s.bytesize = bytesize
 		s.parity = parity
 		s.stopbits = stopbits
-		s.open()
-
 		self.s = s
 
+	def open(self):
+		if self.s is not None and self.s.is_open:
+			self.s.close()
+
+		self.s.open()
+
 	def send_command(self, message: str, check_crc: bool = True):
+		if self.s is None:
+			return None
+
 		buf = b""
 
 		message_bytes = bytes(message, "utf-8")
@@ -57,7 +61,7 @@ class SerialInverter:
 
 		return response
 
-	def parse_response(self, command: str, response: str):
+	def parse_response(self, command: str, response: bytes):
 		try:
 			klass = class_for_name("inverter_types", class_for_command(command))
 			parsed = klass(response)

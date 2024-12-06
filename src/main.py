@@ -19,7 +19,7 @@ class VerboseLevel(int, enum.Enum):
 VERBOSE = VerboseLevel.Silent
 PROCESSING_COMMAND = False
 
-def _print(level: VerboseLevel, msg: str):
+def log(level: VerboseLevel, msg: str):
 	if VERBOSE >= level:
 		print(msg)
 
@@ -47,26 +47,27 @@ def parse_mqtt_param(param: str):
 	return [username, password, host, int(port)]
 
 def send_mqtt_update(mqtt_client: MqttClient, mqtt_topic: str, payload: str):
+	log(VerboseLevel.Debug, ansi.FG_CYAN + f"Sending payload..." + ansi.RESET)
 	[success, return_code] = mqtt_client.send_message(mqtt_topic, payload, retain=False)
 	if success == True:
-		_print(VerboseLevel.Info, ansi.FG_CYAN + f"Sent: {payload}" + ansi.RESET)
+		log(VerboseLevel.Debug, ansi.FG_CYAN + f"Sent payload!" + ansi.RESET)
 	else:
-		_print(VerboseLevel.Error, ansi.FG_RED + f"Failed to update: {return_code}" + ansi.RESET)
+		log(VerboseLevel.Error, ansi.FG_RED + f"Failed to update: {return_code}" + ansi.RESET)
 
 def process_command(inverter_client: SerialInverter, command: str):
-	_print(VerboseLevel.Info, ansi.FG_MAGENTA + f"Sending \"{command}\"..." + ansi.RESET)
+	log(VerboseLevel.Info, ansi.FG_MAGENTA + f"Requesting \"{command}\"..." + ansi.RESET)
 
 	data = inverter_client.send_command(command, check_crc=False)
 	parsed = inverter_client.parse_response(command, data)
 
-	_print(VerboseLevel.Debug, ansi.FG_YELLOW + str(data) + ansi.RESET)
+	log(VerboseLevel.Debug, ansi.FG_YELLOW + str(data) + ansi.RESET)
 
 	if parsed is not None:
 		parsed_json = json.dumps(parsed.__dict__)
-		_print(VerboseLevel.Info, parsed_json)
+		log(VerboseLevel.Info, parsed_json)
 		return parsed_json
 	else:
-		_print(VerboseLevel.Error, ansi.FG_RED + f"Failed to parse!\n{data}" + ansi.RESET)
+		log(VerboseLevel.Error, ansi.FG_RED + f"Failed to parse!\n{data}" + ansi.RESET)
 		return None
 
 def main():
@@ -99,7 +100,7 @@ def main():
 
 	inverter_client = SerialInverter()
 
-	_print(VerboseLevel.Info, ansi.FG_CYAN + f"Opening \"{serial_device}\"..." + ansi.RESET)
+	log(VerboseLevel.Info, ansi.FG_CYAN + f"Opening \"{serial_device}\"..." + ansi.RESET)
 
 	inverter_client.open(serial_device)
 
@@ -118,11 +119,11 @@ def main():
 
 	if mqtt_client is not None and args.mqtt_topic_sub is not None:
 		topic = f"{mqtt_topic}/{args.mqtt_topic_sub}".lower()
-		_print(VerboseLevel.Notice, ansi.FG_CYAN + f"Subscribing to \"{topic}\"" + ansi.RESET)
+		log(VerboseLevel.Notice, ansi.FG_CYAN + f"Subscribing to \"{topic}\"" + ansi.RESET)
 
 		def handle_mqtt_message(userdata, msg):
 			command = msg.payload.decode()
-			_print(VerboseLevel.Notice, ansi.FG_CYAN + f"Incoming message: \"{command}\"" + ansi.RESET)
+			log(VerboseLevel.Notice, ansi.FG_CYAN + f"Incoming message: \"{command}\"" + ansi.RESET)
 			process(command, send_mqtt_message=False)
 
 		mqtt_client.subscribe(topic, handle_mqtt_message)
@@ -138,7 +139,7 @@ def main():
 				for command in commands:
 					process(command)
 			except SerialException as e:
-				_print(VerboseLevel.Error, ansi.FG_RED + e.strerror + ansi.RESET)
+				log(VerboseLevel.Error, ansi.FG_RED + e.strerror + ansi.RESET)
 				inverter_client.open(serial_device)
 			finally:
 				time.sleep(args.polling_interval)

@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 
 source .env
 
@@ -6,7 +6,7 @@ MQTT_CONFIG="${MQTT_PASS}@${MQTT_HOST}"
 
 echo "Starting with options: COMMANDS="$1" DEVICE_PATH=$DEVICE_PATH POLLING_INTERVAL=$POLLING_INTERVAL MQTT_CLIENT_ID=$MQTT_CLIENT_ID MQTT_TOPIC=$MQTT_TOPIC MQTT_TOPIC_SUB=$MQTT_TOPIC_SUB VERBOSE=$VERBOSE"
 
-venv/bin/python3 -u \
+python3 -u \
 	src/main.py \
 	"$1" \
 	-d "$DEVICE_PATH" \

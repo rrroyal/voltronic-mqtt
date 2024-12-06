@@ -100,60 +100,37 @@ class QPIRI:
 		if not raw_response.startswith(b"("):
 			return
 
-		trimmed = raw_response[1:-3]
-		[
-			grid_rating_voltage,
-			grid_rating_current,
-			ac_output_rating_voltage,
-			ac_output_rating_frequency,
-			ac_output_rating_current,
-			ac_output_rating_apparent_power,
-			ac_output_rating_active_power,
-			battery_rating_voltage,
-			battery_recharge_voltage,
-			battery_under_voltage,
-			battery_bulk_voltage,
-			battery_float_voltage,
-			battery_type,
-			current_max_ac_charging_current,
-			current_max_charging_current,
-			input_voltage_range,
-			output_source_priority,
-			charger_source_priority,
-			parallel_max_num,
-			machine_type,
-			topology,
-			output_mode,
-			battery_redischarge_voltage,
-			pv_ok_condition_for_parallel,
-			pv_power_balance
-		] = trimmed.decode(TEXT_ENCODING).split(" ")
+		trimmed = raw_response[1:-3].decode(TEXT_ENCODING).split(" ")
+		trimmed_len = len(trimmed)
 
-		self.grid_rating_voltage = float(grid_rating_voltage)
-		self.grid_rating_current = float(grid_rating_current)
-		self.ac_output_rating_voltage = float(ac_output_rating_voltage)
-		self.ac_output_rating_frequency = float(ac_output_rating_frequency)
-		self.ac_output_rating_current = float(ac_output_rating_current)
-		self.ac_output_rating_apparent_power = int(ac_output_rating_apparent_power)
-		self.ac_output_rating_active_power = int(ac_output_rating_active_power)
-		self.battery_rating_voltage = float(battery_rating_voltage)
-		self.battery_recharge_voltage = float(battery_recharge_voltage)
-		self.battery_under_voltage = float(battery_under_voltage)
-		self.battery_bulk_voltage = float(battery_bulk_voltage)
-		self.battery_float_voltage = float(battery_float_voltage)
-		self.battery_type = QPIRI.BatteryType(int(battery_type))
-		self.current_max_ac_charging_current = current_max_ac_charging_current # TODO: ?
-		self.current_max_charging_current = current_max_charging_current # TODO: ?
-		self.input_voltage_range = QPIRI.InputVoltageRange(int(input_voltage_range))
-		self.output_source_priority = QPIRI.OutputSourcePriority(int(output_source_priority))
-		self.charger_source_priority = QPIRI.ChargerSourcePriority(int(charger_source_priority))
-		self.parallel_max_num = int(parallel_max_num)
-		self.machine_type = QPIRI.MachineType(machine_type)
-		self.topology = QPIRI.Topology(int(topology))
-		self.output_mode = QPIRI.OutputMode(int(output_mode))
-		self.battery_redischarge_voltage = float(battery_redischarge_voltage)
-		self.pv_ok_condition_for_parallel = pv_ok_condition_for_parallel
-		self.pv_power_balance = pv_power_balance
+		self.grid_rating_voltage = float(trimmed[0])
+		self.grid_rating_current = float(trimmed[1])
+		self.ac_output_rating_voltage = float(trimmed[2])
+		self.ac_output_rating_frequency = float(trimmed[3])
+		self.ac_output_rating_current = float(trimmed[4])
+		self.ac_output_rating_apparent_power = int(trimmed[5])
+		self.ac_output_rating_active_power = int(trimmed[6])
+		self.battery_rating_voltage = float(trimmed[7])
+		self.battery_recharge_voltage = float(trimmed[8])
+		self.battery_under_voltage = float(trimmed[9])
+		self.battery_bulk_voltage = float(trimmed[10])
+		self.battery_float_voltage = float(trimmed[11])
+		self.battery_type = QPIRI.BatteryType(int(trimmed[12]))
+		self._something1 = trimmed[13]
+		self._something2 = trimmed[14]
+		self.input_voltage_range = QPIRI.InputVoltageRange(int(trimmed[15]))
+		self.output_source_priority = QPIRI.OutputSourcePriority(int(trimmed[16]))
+		self.charger_source_priority = QPIRI.ChargerSourcePriority(int(trimmed[17]))
+		self.parallel_max_num = int(trimmed[18])
+		self.machine_type = QPIRI.MachineType(trimmed[19])
+		self.topology = QPIRI.Topology(int(trimmed[20]))
+		self.output_mode = QPIRI.OutputMode(int(trimmed[21]))
+		self.battery_redischarge_voltage = float(trimmed[22])
+		self.pv_ok_condition_for_parallel = trimmed[23]
+		self.pv_power_balance = trimmed[24]
+		self._something3 = trimmed[25] if trimmed_len > 25 else None
+		self._something4 = trimmed[26] if trimmed_len > 26 else None
+		self._something5 = trimmed[27] if trimmed_len > 27 else None
 
 class QFLAG:
 	silence_buzzer = None

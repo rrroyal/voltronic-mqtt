@@ -23,7 +23,7 @@ docker run -it -d --name voltronic-mqtt \
   -e MQTT_HOST="127.0.0.1:1883" \
   -e MQTT_PASS="user:pass" \
   -e MQTT_CLIENT_ID="voltronic-mqtt" \
-  -e MQTT_TOPIC="homeassistant/sensor/voltronic" \
+  -e MQTT_TOPIC="iot/voltronic" \
   -e MQTT_TOPIC_SUB="send_cmd" \
   --device "/dev/ttyUSB0:/dev/ttyUSB0" \
   --restart unless-stopped \
@@ -56,7 +56,7 @@ This file contains the following configuration options:
 - #### `MQTT_CLIENT_ID`
   The ID of the MQTT client (i.e. `voltronic-mqtt`).
 - #### `MQTT_TOPIC`
-  The topic of MQTT messages (i.e. `homeassistant/sensor/voltronic`) **Note: lowercased command will be added as a suffix (i.e. `/qpigs`).**
+  The topic of MQTT messages (i.e. `iot/voltronic`) **Note: lowercased command will be added as a suffix (i.e. `/qpigs`).**
 - #### `MQTT_TOPIC_SUB`
   The MQTT topic suffix to subscribe to (i.e. `send_cmd`)
 

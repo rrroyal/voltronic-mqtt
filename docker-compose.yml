@@ -10,7 +10,7 @@ services:
       - MQTT_HOST=127.0.0.1:1883
       - MQTT_PASS=user:pass
       - MQTT_CLIENT_ID=voltronic-mqtt
-      - MQTT_TOPIC=homeassistant/sensor/voltronic
+      - MQTT_TOPIC=iot/voltronic
       - MQTT_TOPIC_SUB=send_cmd
     devices:
       - "/dev/ttyUSB0:/dev/ttyUSB0"
